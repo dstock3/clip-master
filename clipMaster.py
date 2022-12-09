@@ -21,25 +21,14 @@ video_button = QPushButton("Choose File")
 
 # Define a function to handle file dialog
 def select_file():
-    # Open file dialog and get selected file
-    filename, _ = QFileDialog.getOpenFileName(window, "Select a video file")
+    # Open file dialog and only allow the user to select video files
+    filename, _ = QFileDialog.getOpenFileName(window, "Select a video file", "", "Video Files (*.mp4 *.avi *.mov)")
 
-    # Get the file's actual extension using the os.path.splitext function
-    _, file_extension = os.path.splitext(filename)
+    # Use the MoviePy VideoFileClip class to open the selected file
+    video = VideoFileClip(filename)
 
-    # Use the MoviePy VideoFileClip class to attempt to open the file
-    try:
-        VideoFileClip(filename)
-    except Exception:
-        # If the VideoFileClip class is unable to open the file, display an error message
-        error_message = f"Error: {file_extension.upper()} is not a supported file type. Please select a valid video file."
-        QMessageBox.warning(window, "Error", error_message)
-    else:
-        # If the VideoFileClip class is able to open the file, set the text of the input field to the selected file
-        video_input.setText(filename)
-
-# Connect the button's clicked signal to the select_file function
-video_button.clicked.connect(select_file)
+    # Set the text of the input field to the selected file
+    video_input.setText(filename)
 
 # Connect button's clicked signal to  select_file function
 video_button.clicked.connect(select_file)
