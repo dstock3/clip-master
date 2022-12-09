@@ -1,7 +1,8 @@
 # Import necessary libraries and modules
 from moviepy.editor import VideoFileClip, concatenate_videoclips
-from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QLineEdit, QLabel, QPushButton, QHBoxLayout, QMessageBox, QSlider, QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QLineEdit, QLabel, QPushButton, QHBoxLayout, QMessageBox, QSlider, QVBoxLayout, QFormLayout
 from PyQt5 import Qt
+import os
 
 # Create main application
 app = QApplication([])
@@ -20,19 +21,25 @@ video_button = QPushButton("Choose File")
 
 # Define a function to handle file dialog
 def select_file():
-    # Open  file dialog and get selected file
+    # Open file dialog and get selected file
     filename, _ = QFileDialog.getOpenFileName(window, "Select a video file")
 
-    # Check if file is a valid video file
-    allowed_extensions = ["mp4", "avi", "mkv", "mov"]
-    file_extension = filename.split(".")[-1]
-    if file_extension not in allowed_extensions:
-        # Display an error message if  file is not a valid video file
-        error_message = f"Error: {file_extension.upper()} is not a supported file type. Please select a video file with one of  following extensions: {', '.join(allowed_extensions)}"
+    # Get the file's actual extension using the os.path.splitext function
+    _, file_extension = os.path.splitext(filename)
+
+    # Use the MoviePy VideoFileClip class to attempt to open the file
+    try:
+        VideoFileClip(filename)
+    except Exception:
+        # If the VideoFileClip class is unable to open the file, display an error message
+        error_message = f"Error: {file_extension.upper()} is not a supported file type. Please select a valid video file."
         QMessageBox.warning(window, "Error", error_message)
     else:
-        # Set  text of input field to  selected file
+        # If the VideoFileClip class is able to open the file, set the text of the input field to the selected file
         video_input.setText(filename)
+
+# Connect the button's clicked signal to the select_file function
+video_button.clicked.connect(select_file)
 
 # Connect button's clicked signal to  select_file function
 video_button.clicked.connect(select_file)
@@ -53,6 +60,20 @@ button_layout.addStretch()
 
 # Add  button layout to main window
 window.setLayout(button_layout)
+
+# Create a form layout
+form = QFormLayout()
+
+# Create a label and input field for the video file
+video_label = QLabel("Video file:")
+video_input = QLineEdit()
+video_input.setReadOnly(True)
+
+# Add the label and input field to the form
+form.addRow(video_label, video_input)
+
+# Add the form to the main layout
+button_layout.addLayout(form)
 
 # Define a function to split video
 def split_video():
